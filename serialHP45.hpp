@@ -63,11 +63,28 @@ class HP45{
 		int status_state = 0;
 		int send_get_status = 0;
 		std::string send_status_buffer = "";
+		int inkjet_writeleft;
 
 
 		void GetStatus();
+		std::vector<std::string> split(std::string in, std::string delimiter);
 
 };
+
+std::vector<std::string>
+split(std::string in, std::string delimiter){
+	size_t pos = 0;
+	std::string token;
+	std::vector<std::string> split_text;
+
+	while((pos = in.find(delimiter)) != std::string::npos ){
+		token = in.substr(0, pos);
+		split_text.push_back(token);
+		in.erase(0, pos + delimiter.lengt())
+	}
+	return split_text;
+}
+
 
 void
 HP45::GetStatus(){
@@ -108,7 +125,7 @@ int HP45::openPort(){
 	fd = open(port.c_str(), O_RDWR, O_NOCTTY, O_NDELAY);
 	if (fd < 0){
 		std::cerr << "Error on open the serial port "<< std::endl;
-		return -1;	
+		return -1;
 	}
 
 	if (!isatty(fd)){
@@ -146,7 +163,7 @@ int HP45::openPort(){
 
 	std::cout << "Port openned" << std::endl;
 	connected = 1;
-	return 1; 
+	return 1;
 }
 
 int HP45::writePort(std::string message){
@@ -179,7 +196,14 @@ HP45::update(){
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	std::string buff = "";
 	std::string str_OK = "OK";
-	
+	std::string str_BWL = "BWL";
+
+	std::string temp_decode;
+	std::string read_buffer;
+	std::string read_line;
+
+
+
 	while(start_event){
 		ok = 0;
 		buff = readPort();
@@ -189,8 +213,11 @@ HP45::update(){
 		}
 
 		if (ok == 1){
-			/*Read for print*/
-			
+			/*Ready for print*/
+			if (!strncmp(buff.c_str(), stR_BWL.c_str(), str_BWL.size())){
+
+			}
+
 		}
 
 
@@ -206,7 +233,7 @@ HP45::BufferNext(){
 	}
 }
 
-void 
+void
 HP45::SerialWriteBufferRaw(std::string input_string){
 	if (connected){
 		code_buffer.push_back(input_string + '\r');
