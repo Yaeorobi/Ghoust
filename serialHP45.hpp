@@ -32,6 +32,10 @@ SOFTWARE
 #include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
+#include <chrono>
+#include <thread>
+#include <vector>
+
 
 class HP45{
 	public:
@@ -45,15 +49,44 @@ class HP45{
 		int closePort();
 
 		void update();
+		void BufferNext();
+		void SerialWriteBufferRaw(std::string input_string);
 
 	private:
 		int fd;
 		std::string port;
 		int baudrate;
 		int start_event = 0;
+		int ok = 0;
+		int connected = 0;
+		std::vector<std::string> code_buffer;
+		int status_state = 0;
+		int send_get_status = 0;
+		std::string send_status_buffer = "";
+
+
+		void GetStatus();
 
 };
 
+void
+HP45::GetStatus(){
+	std::this_thread::sleep_for(std::chrono::seconds(5));
+	while (start_event){
+		std::this_thread::sleep_for(std::chrono::milliseconds(100)); //  wait for 0.1 seconds
+		if (status_state == 0)
+			send_status_buffer = "GTP";
+		if (status_state == 1)
+			send_status_buffer = "GEP";
+		if (status_state == 2)
+			send_status_buffer = "BWL";
+
+		send_get_status = 1;
+		status_stat ++;
+		if (status_state > 2)
+			status_state = 0;
+	}
+}
 
 
 HP45::HP45(std::string portname, int baud){
@@ -69,7 +102,9 @@ HP45::~HP45(){
 
 int HP45::openPort(){
 	struct termios config;
-
+	if (connected == 1){ // I am read connected
+		return 0
+	}
 	fd = open(port.c_str(), O_RDWR, O_NOCTTY, O_NDELAY);
 	if (fd < 0){
 		std::cerr << "Error on open the serial port "<< std::endl;
@@ -110,6 +145,7 @@ int HP45::openPort(){
 	}
 
 	std::cout << "Port openned" << std::endl;
+	connected = 1;
 	return 1; 
 }
 
@@ -125,7 +161,7 @@ int HP45::writePort(std::string message){
 std::string
 readPort(){
 	std::string s;
-	if (read(fd, %s, 255) > 0){
+	if (read(fd, %s, 64) > 0){
 		return s;
 	}
 	return "";
@@ -140,14 +176,41 @@ HP45::closePort(){
 
 void
 HP45::update(){
-	std::this_thread::sleep_for(0.05);
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	std::string buff = "";
-
-	while (start_event){
+	std::string str_OK = "OK";
+	
+	while(start_event){
+		ok = 0;
 		buff = readPort();
+		/*Receive a OK word*/
+		if (!strncmp(buff.c_str(), str_OK.c_str(), str_OK.size())){
+			ok = 1;
+		}
 
-	} 
+		if (ok == 1){
+			/*Read for print*/
+			
+		}
 
+
+	}
+}
+
+void
+HP45::BufferNext(){
+	/*Print next element of the buffer*/
+	if (code_buffer.size() > 0){
+		writePort(code_buffer.front()); // print HP45
+		code_buffer.erase(code_buffer.begin());
+	}
+}
+
+void 
+HP45::SerialWriteBufferRaw(std::string input_string){
+	if (connected){
+		code_buffer.push_back(input_string + '\r');
+	}
 }
 
 #endif // SERIALHP45_HPP_INCLUDE
