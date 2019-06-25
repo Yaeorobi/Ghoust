@@ -43,7 +43,7 @@ class HP45{
 		~HP45();
 
 		int openPort();
-		int writePort(std::string message);}
+		int writePort(std::string message);
 		std::string readPort();
 
 		int closePort();
@@ -80,7 +80,7 @@ split(std::string in, std::string delimiter){
 	while((pos = in.find(delimiter)) != std::string::npos ){
 		token = in.substr(0, pos);
 		split_text.push_back(token);
-		in.erase(0, pos + delimiter.lengt())
+		in.erase(0, pos + delimiter.length());
 	}
 	return split_text;
 }
@@ -99,7 +99,7 @@ HP45::GetStatus(){
 			send_status_buffer = "BWL";
 
 		send_get_status = 1;
-		status_stat ++;
+		status_state ++;
 		if (status_state > 2)
 			status_state = 0;
 	}
@@ -120,7 +120,7 @@ HP45::~HP45(){
 int HP45::openPort(){
 	struct termios config;
 	if (connected == 1){ // I am read connected
-		return 0
+		return 0;
 	}
 	fd = open(port.c_str(), O_RDWR, O_NOCTTY, O_NDELAY);
 	if (fd < 0){
@@ -178,7 +178,7 @@ int HP45::writePort(std::string message){
 std::string
 readPort(){
 	std::string s;
-	if (read(fd, %s, 64) > 0){
+	if (read(fd, &s, 64) > 0){
 		return s;
 	}
 	return "";
@@ -217,10 +217,7 @@ HP45::update(){
 			if (!strncmp(buff.c_str(), stR_BWL.c_str(), str_BWL.size())){
 
 			}
-
 		}
-
-
 	}
 }
 
