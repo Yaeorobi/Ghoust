@@ -175,10 +175,10 @@ int HP45::writePort(std::string message){
 	return 1;
 }
 
-std::string
-readPort(){
+std::string 
+HP45::readPort(){
 	std::string s;
-	if (read(fd, &s, 64) > 0){
+	if (read(this->fd, &s, 64) > 0){
 		return s;
 	}
 	return "";
@@ -214,7 +214,7 @@ HP45::update(){
 
 		if (ok == 1){
 			/*Ready for print*/
-			if (!strncmp(buff.c_str(), stR_BWL.c_str(), str_BWL.size())){
+			if (!strncmp(buff.c_str(), str_BWL.c_str(), str_BWL.size())){
 
 			}
 		}

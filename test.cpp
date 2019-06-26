@@ -69,21 +69,21 @@ int main(int argc, char** argv){
 
 		auto result = options.parse(argc, argv);
 
-	}catch{
-		std::cout <<"error parsing options: " << e.what() <<std::end;
+		HP45 hp45 = HP45(result["port"].as<std::string>(), result["baud"].as<int>());
+
+  		hp45.openPort();
+
+		std::cout << hp45.writePort("GTP");
+
+		std::cout << hp45.readPort() << std::endl;
+	
+		std::cout << "test finished" << std::endl;
+	}catch(const cxxopts::OptionException& e){
+		std::cout <<"error parsing options: " << e.what() <<std::endl;
 		exit(1);
 	}
 
 
-	HP45 hp45 = HP45(result["port"].as<std::string>(), result["baud"].as<int>());
-
-	hp45.openPort();
-
-	std::cout << hp45.writePort("GTP");
-
-	std::cout << hp45.readPort() << std::endl;
-	
-	std::cout << "test finished" << std::endl;
 
 	return 0;
 
